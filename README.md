@@ -6,6 +6,17 @@
  
  I did not write this code.  The code was found in the comments section of the linked blog entry.  The commenter who posted the code was koala.  I have made some modifications to koala's original code (i.e. formating, adding some arguments/features, commenting).
  
+
+### Dependenices
+ - python
+ - opencv
+ - python-opencv
+ - numpy
+
+#### Extra Info
+ - https://stackoverflow.com/questions/43484357/opencv-in-ubuntu-17-04#43507858 
+
+
 ### Example output
 too shaky for good example, but you get the idea
 

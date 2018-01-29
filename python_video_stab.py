@@ -6,12 +6,20 @@
 #ORIGINAL CPP: http://nghiaho.com/uploads/code/videostab.cpp
 
 #example usage:
-#	python python_video_stab.py --video input_video.mov --output output -compareOutput 1 --maxWidth 400
+#	python python_video_stab.py --video input_video.mov --output output --compareOutput 1 --maxWidth 400
 import cv2
 import numpy as np
 import pandas as pd
 import argparse
 import imutils
+import sys
+import time
+
+# TODO: 
+#	- [Done] Visual process status
+#	- build functions instead of script format
+#	- look into performance improvements
+#
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -20,6 +28,23 @@ ap.add_argument("-o", "--output", default='.', help="path to dir to save video a
 ap.add_argument("-c", "--compareOutput", default=1, type=int, help="should output be a side by side comparison")
 ap.add_argument("-w", "--maxWidth", default=400, type=int, help="max width of output video")
 args = vars(ap.parse_args())
+
+# derived from: https://stackoverflow.com/questions/3160699/python-progress-bar#3160819 
+def update_progress(total, progress):
+    barLength, status = 20, ""
+    progress = float(progress) / float(total)
+    if progress >= 1.:
+        progress, status = 1, "\r\n"
+    block = int(round(barLength * progress))
+    text = "\r[{}] {:.0f}% {}".format(
+        "#" * block + "-" * (barLength - block), round(progress * 100, 0),
+        status)
+    sys.stdout.write(text)
+    sys.stdout.flush()
+
+
+print "Part 1: Setting up video capture and calculating STAB"
+
 
 #####
 # CALC T MAT FOR STAB
@@ -74,6 +99,7 @@ for k in range(N-1):
 	#set current frame to prev frame for use in next iteration
 	prev = cur[:]
 	prev_gray = cur_gray[:]
+	update_progress(N, k + 1) 
 
 #convert list of transforms to array
 prev_to_cur_transform = np.array(prev_to_cur_transform)
@@ -114,6 +140,8 @@ if args['compareOutput'] > 0:
 out = cv2.VideoWriter('{}/stabilized_output.avi'.format(args['output']), 
 	cv2.VideoWriter_fourcc('P','I','M','1'), fps, (w_write, h_write), True)
 
+print "\nPart 2: Looping through frames"
+
 #loop through frame count
 for k in range(N-1):
 	#read current frame
@@ -138,10 +166,13 @@ for k in range(N-1):
 	else:
 		#resize to maxwidth (if current width larger than maxwidth)
 		cur2 = imutils.resize(cur2, width = min(w, args['maxWidth']))
+	
 	#show frame to screen
-	cv2.imshow('stable', cur2)
-	cv2.waitKey(20)
+	# cv2.imshow('stable', cur2)
+	# cv2.waitKey(20)
+
 	#write frame to output video
 	out.write(cur2)
+	update_progress(N, k + 1)
 
-print("Done")
+print("\nDone")
