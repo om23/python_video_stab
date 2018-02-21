@@ -12,9 +12,11 @@
  - opencv
  - python-opencv
  - numpy
+ - pandas
+ - imutils
+ - 
 
 #### Extra Info
- - https://stackoverflow.com/questions/43484357/opencv-in-ubuntu-17-04#43507858 
 
 
 ### Example output

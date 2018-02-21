@@ -19,7 +19,14 @@ import time
 #	- [Done] Visual process status
 #	- build functions instead of script format
 #	- look into performance improvements
-#
+#	- [Done] get size of frames
+#	- [Done] trim frame to certain size, by %?
+#	- Make cropping an argument ot pass in
+#	- Maybe cropping isn't the best solution, should be doing something to try minimizing times the frame is out of center (black background)
+#	- For cropping, have scale values relative to common frame sizes
+# 		- maxWidth defs (not accurate since only width): 1280 (720p), 1920 (1080p), 3840 (2160p - 4k)
+
+
 
 # construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -28,6 +35,16 @@ ap.add_argument("-o", "--output", default='.', help="path to dir to save video a
 ap.add_argument("-c", "--compareOutput", default=1, type=int, help="should output be a side by side comparison")
 ap.add_argument("-w", "--maxWidth", default=400, type=int, help="max width of output video")
 args = vars(ap.parse_args())
+
+
+
+def crop_img(img, scale=1.0):
+    center_x, center_y = img.shape[1] / 2, img.shape[0] / 2
+    width_scaled, height_scaled = img.shape[1] * scale, img.shape[0] * scale
+    left_x, right_x = center_x - width_scaled / 2, center_x + width_scaled / 2
+    top_y, bottom_y = center_y - height_scaled / 2, center_y + height_scaled / 2
+    img_cropped = img[int(top_y):int(bottom_y), int(left_x):int(right_x)]
+    return img_cropped
 
 # derived from: https://stackoverflow.com/questions/3160699/python-progress-bar#3160819 
 def update_progress(total, progress):
@@ -48,11 +65,13 @@ print "Part 1: Setting up video capture and calculating STAB"
 
 #####
 # CALC T MAT FOR STAB
-#####
 #set up video capture
 cap = cv2.VideoCapture(args['video'])
 N = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 fps = int(cap.get(cv2.CAP_PROP_FPS))
+crop_scale = 0.75
+
+
 
 #read first frame
 status, prev = cap.read()
@@ -137,8 +156,10 @@ h_write = imutils.resize(prev_gray, width = w_write).shape[0]
 if args['compareOutput'] > 0:
 	w_write = w_write*2
 #setup video writer
+w_scale = int(w_write*crop_scale)
+h_scale = int(h_write*crop_scale)
 out = cv2.VideoWriter('{}/stabilized_output.avi'.format(args['output']), 
-	cv2.VideoWriter_fourcc('P','I','M','1'), fps, (w_write, h_write), True)
+	cv2.VideoWriter_fourcc('P','I','M','1'), fps, (w_scale, h_scale), True)
 
 print "\nPart 2: Looping through frames"
 
@@ -170,9 +191,10 @@ for k in range(N-1):
 	#show frame to screen
 	# cv2.imshow('stable', cur2)
 	# cv2.waitKey(20)
-
+	img_cropped = crop_img(cur2, crop_scale)
 	#write frame to output video
-	out.write(cur2)
+	# out.write(cur2)
+	out.write(img_cropped)
 	update_progress(N, k + 1)
 
 print("\nDone")

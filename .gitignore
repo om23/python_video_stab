@@ -10,6 +10,7 @@ __pycache__/
 .Python
 env/
 build/
+output/
 output-test/
 develop-eggs/
 dist/
