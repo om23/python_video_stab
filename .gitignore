@@ -1,7 +1,29 @@
+# test data
+tests/pickled_transforms
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# pycharm
+.idea*
+
+# profiling data
+temp.dat
+
+# large testing files
+pickled_transforms/*
+stable_video.avi
+input_video.mov
+*.avi
+# *.gif
+*.mp4
+*.png
+*.mov
+
+# keynote stuff
+*.key
 
 # C extensions
 *.so
